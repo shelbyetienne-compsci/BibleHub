@@ -1,0 +1,39 @@
+name: Update Concordance Database
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.12"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+        pip install beautifulsoup4
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: execute py script
+      env:
+        SOME_SECRET: ${{ secrets.SOME_SECRET }}
+      run: python scrape_concordance.py
+    - name: Run Update Script
+      run: |
+        git config --global user.name "shelbyetienne-compsci"
+        git config --global user.email "shelbycompsci@gmail.com"
+        git add concordance.db
+        git commit -m "Auto update concordance.db"
+    - name: Push changers
+      uses: ad-m/github-push-action@v0.6.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: main
+
